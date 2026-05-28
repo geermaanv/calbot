@@ -12,7 +12,7 @@ _lock = threading.Lock()
 
 def _load() -> dict:
     if not USERS_FILE.exists():
-        return {"approved": {}, "pending": {}}
+        return {"approved": [], "pending": []}
     with open(USERS_FILE) as f:
         return json.load(f)
 
@@ -22,51 +22,59 @@ def _save(data: dict):
         json.dump(data, f, indent=2)
 
 
-def get_sheet_id(user_id: int) -> str | None:
-    with _lock:
-        data = _load()
-        return data["approved"].get(str(user_id))
+def _migrate(data: dict) -> dict:
+    """Migra formato viejo {id: sheet_id} al nuevo formato de lista."""
+    if isinstance(data.get("approved"), dict):
+        data["approved"] = list(data["approved"].keys())
+    if isinstance(data.get("pending"), dict):
+        data["pending"] = list(data["pending"].keys())
+    return data
 
 
 def is_approved(user_id: int) -> bool:
-    return get_sheet_id(user_id) is not None
+    with _lock:
+        data = _migrate(_load())
+        return str(user_id) in data["approved"]
 
 
 def is_pending(user_id: int) -> bool:
     with _lock:
-        data = _load()
+        data = _migrate(_load())
         return str(user_id) in data["pending"]
 
 
-def add_pending(user_id: int, sheet_id: str):
+def add_pending(user_id: int):
     with _lock:
-        data = _load()
-        data["pending"][str(user_id)] = sheet_id
+        data = _migrate(_load())
+        if str(user_id) not in data["pending"]:
+            data["pending"].append(str(user_id))
         _save(data)
 
 
-def approve(user_id: int) -> str | None:
-    """Mueve usuario de pending a approved. Retorna sheet_id o None."""
+def approve(user_id: int) -> bool:
     with _lock:
-        data = _load()
-        sheet_id = data["pending"].pop(str(user_id), None)
-        if sheet_id:
-            data["approved"][str(user_id)] = sheet_id
-            _save(data)
-        return sheet_id
+        data = _migrate(_load())
+        uid = str(user_id)
+        if uid in data["pending"]:
+            data["pending"].remove(uid)
+        if uid not in data["approved"]:
+            data["approved"].append(uid)
+        _save(data)
+        return True
 
 
 def reject(user_id: int) -> bool:
-    """Elimina usuario de pending. Retorna True si existía."""
     with _lock:
-        data = _load()
-        existed = str(user_id) in data["pending"]
-        data["pending"].pop(str(user_id), None)
+        data = _migrate(_load())
+        uid = str(user_id)
+        if uid not in data["pending"]:
+            return False
+        data["pending"].remove(uid)
         _save(data)
-        return existed
+        return True
 
 
 def get_approved_ids() -> list[int]:
     with _lock:
-        data = _load()
-        return [int(k) for k in data["approved"].keys()]
+        data = _migrate(_load())
+        return [int(k) for k in data["approved"]]

@@ -7,6 +7,9 @@ Arrancar:
 """
 import os
 import re
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from telegram import Update
 from telegram.ext import (
@@ -27,7 +30,7 @@ def build_app() -> Application:
     app = Application.builder().token(TOKEN).build()
 
     # --- Filtros ---
-    admin_filter = filters.User(user_ids=ADMIN_USER_IDS)
+    admin_filter = filters.User(user_id=ADMIN_USER_IDS)
 
     def approved_filter():
         """Filtro dinámico: recalcula en cada mensaje."""
@@ -43,11 +46,11 @@ def build_app() -> Application:
         admin.handle_reject,
     ))
 
-    # --- /start ---
-    # Para admins
+    # --- /start y /ayuda ---
     app.add_handler(CommandHandler("start", admin.handle_start_admin, filters=admin_filter))
-    # Para usuarios registrados
     app.add_handler(CommandHandler("start", commands.handle_start))
+    app.add_handler(CommandHandler("ayuda", commands.handle_ayuda))
+    app.add_handler(CommandHandler("resumen", commands.handle_resumen))
 
     # --- Onboarding ---
     app.add_handler(CommandHandler("registro", onboarding.handle_registro))

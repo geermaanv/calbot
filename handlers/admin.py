@@ -29,8 +29,8 @@ async def handle_approve(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await update.message.reply_text("ID inválido.")
         return
 
-    sheet_id = users_store.approve(target_id)
-    if not sheet_id:
+    approved = users_store.approve(target_id)
+    if not approved:
         await update.message.reply_text(f"No encontré solicitud pendiente para {target_id}.")
         return
 
