@@ -48,6 +48,8 @@ def build_app() -> Application:
     app.add_handler(CommandHandler("ayuda", commands.handle_ayuda))
     app.add_handler(CommandHandler("resumen", commands.handle_resumen))
     app.add_handler(CommandHandler("recordatorio", commands.handle_recordatorio))
+    app.add_handler(CommandHandler("borrar", commands.handle_borrar))
+    app.add_handler(CommandHandler("hoy", commands.handle_hoy))
 
     # --- Onboarding ---
     app.add_handler(CommandHandler("registro", onboarding.handle_registro))

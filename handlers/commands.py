@@ -17,7 +17,9 @@ AYUDA_MSG = (
     "_en realidad era milanesa de pollo_\n"
     "_me equivoqué, fueron 3 empanadas, no 5_\n\n"
     "*Comandos:*\n"
+    "/hoy — ver todos los registros de hoy\n"
     "/resumen — calorías de hoy, semana y mes\n"
+    "/borrar — eliminar el último registro\n"
     "/recordatorio — activar o desactivar recordatorios (10:00, 14:00, 18:00 y 21:00)\n"
     "/ayuda — este mensaje"
 )
@@ -36,6 +38,48 @@ async def handle_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def handle_ayuda(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(AYUDA_MSG, parse_mode="Markdown")
+
+
+async def handle_borrar(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    if not users_store.is_approved(user_id):
+        return
+    tab = update.effective_user.username or str(user_id)
+    try:
+        entry = sheets_client.delete_last_entry(tab)
+    except Exception:
+        await update.message.reply_text("No pude eliminar el registro. Intentá de nuevo.")
+        return
+    if not entry:
+        await update.message.reply_text("No hay registros para eliminar.")
+        return
+    await update.message.reply_text(
+        f"Eliminado: {entry['plato']} — {entry['calorias']} kcal ({entry['timestamp']})"
+    )
+
+
+async def handle_hoy(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    if not users_store.is_approved(user_id):
+        return
+    tab = update.effective_user.username or str(user_id)
+    try:
+        entries = sheets_client.get_today_entries(tab)
+    except Exception:
+        await update.message.reply_text("No pude obtener los registros. Intentá de nuevo.")
+        return
+    if not entries:
+        await update.message.reply_text("Todavía no registraste nada hoy.")
+        return
+    total = sum(int(e["calorias"]) for e in entries)
+    lineas = "\n".join(
+        f"{e['hora']}  {e['plato']} — {e['calorias']} kcal"
+        for e in entries
+    )
+    await update.message.reply_text(
+        f"```\nHoy\n{'─'*28}\n{lineas}\n{'─'*28}\nTotal: {total:,} kcal\n```".replace(",", "."),
+        parse_mode="Markdown",
+    )
 
 
 async def handle_recordatorio(update: Update, context: ContextTypes.DEFAULT_TYPE):
