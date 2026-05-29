@@ -18,7 +18,7 @@ AYUDA_MSG = (
     "_me equivoqué, fueron 3 empanadas, no 5_\n\n"
     "*Comandos:*\n"
     "/resumen — calorías de hoy, semana y mes\n"
-    "/recordatorio — activar o desactivar recordatorios de comidas\n"
+    "/recordatorio — activar o desactivar recordatorios (10:00, 14:00, 18:00 y 21:00)\n"
     "/ayuda — este mensaje"
 )
 
