@@ -3,3 +3,4 @@ anthropic
 gspread
 python-dotenv
 openai
+apscheduler

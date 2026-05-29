@@ -18,6 +18,7 @@ AYUDA_MSG = (
     "_me equivoqué, fueron 3 empanadas, no 5_\n\n"
     "*Comandos:*\n"
     "/resumen — calorías de hoy, semana y mes\n"
+    "/recordatorio — activar o desactivar recordatorios de comidas\n"
     "/ayuda — este mensaje"
 )
 
@@ -35,6 +36,21 @@ async def handle_start(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 async def handle_ayuda(update: Update, context: ContextTypes.DEFAULT_TYPE):
     await update.message.reply_text(AYUDA_MSG, parse_mode="Markdown")
+
+
+async def handle_recordatorio(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    user_id = update.effective_user.id
+    if not users_store.is_approved(user_id):
+        return
+    activo = users_store.reminders_on(user_id)
+    users_store.set_reminders(user_id, not activo)
+    if activo:
+        await update.message.reply_text("Recordatorios desactivados ⏸️")
+    else:
+        await update.message.reply_text(
+            "Recordatorios activados ✅\n"
+            "Te voy a avisar a las 10:00, 14:00, 18:00 y 21:00."
+        )
 
 
 async def handle_resumen(update: Update, context: ContextTypes.DEFAULT_TYPE):

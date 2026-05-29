@@ -78,3 +78,27 @@ def get_approved_ids() -> list[int]:
     with _lock:
         data = _migrate(_load())
         return [int(k) for k in data["approved"]]
+
+
+def reminders_on(user_id: int) -> bool:
+    with _lock:
+        data = _migrate(_load())
+        return str(user_id) in data.get("reminders", [])
+
+
+def set_reminders(user_id: int, active: bool):
+    with _lock:
+        data = _migrate(_load())
+        reminders = data.setdefault("reminders", [])
+        uid = str(user_id)
+        if active and uid not in reminders:
+            reminders.append(uid)
+        elif not active and uid in reminders:
+            reminders.remove(uid)
+        _save(data)
+
+
+def get_reminder_ids() -> list[int]:
+    with _lock:
+        data = _migrate(_load())
+        return [int(k) for k in data.get("reminders", [])]

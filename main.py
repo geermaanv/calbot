@@ -20,7 +20,7 @@ from telegram.ext import (
 )
 
 from handlers import log_food, onboarding, admin, commands
-from services import users_store
+from services import users_store, reminders
 
 TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
 ADMIN_USER_IDS = [int(x) for x in os.environ.get("ADMIN_USER_IDS", "").split(",") if x.strip()]
@@ -51,6 +51,7 @@ def build_app() -> Application:
     app.add_handler(CommandHandler("start", commands.handle_start))
     app.add_handler(CommandHandler("ayuda", commands.handle_ayuda))
     app.add_handler(CommandHandler("resumen", commands.handle_resumen))
+    app.add_handler(CommandHandler("recordatorio", commands.handle_recordatorio))
 
     # --- Onboarding ---
     app.add_handler(CommandHandler("registro", onboarding.handle_registro))
@@ -74,7 +75,12 @@ def build_app() -> Application:
     return app
 
 
+async def post_init(app):
+    reminders.setup(app.bot)
+
+
 if __name__ == "__main__":
     print("CalBot iniciando...")
     app = build_app()
+    app.post_init = post_init
     app.run_polling()
