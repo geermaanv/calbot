@@ -47,13 +47,15 @@ def _parse_json(text: str) -> dict:
     return json.loads(text)
 
 
+_DIAS = {"Monday": "lunes", "Tuesday": "martes", "Wednesday": "miércoles",
+         "Thursday": "jueves", "Friday": "viernes", "Saturday": "sábado", "Sunday": "domingo"}
+
+
 def estimate_calories(text: str) -> dict:
     from datetime import datetime
-    hoy = datetime.now().strftime("%d/%m/%Y (%A)").replace(
-        "Monday", "lunes").replace("Tuesday", "martes").replace(
-        "Wednesday", "miércoles").replace("Thursday", "jueves").replace(
-        "Friday", "viernes").replace("Saturday", "sábado").replace(
-        "Sunday", "domingo")
+    now = datetime.now()
+    dia_es = _DIAS[now.strftime("%A")]
+    hoy = f"{now.strftime('%d/%m/%Y')} ({dia_es})"
     prompt = CALORIE_PROMPT.format(hoy=hoy)
     return _parse_json(_chat(prompt, text, 120))
 

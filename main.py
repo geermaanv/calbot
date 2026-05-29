@@ -32,10 +32,6 @@ def build_app() -> Application:
     # --- Filtros ---
     admin_filter = filters.User(user_id=ADMIN_USER_IDS)
 
-    def approved_filter():
-        """Filtro dinámico: recalcula en cada mensaje."""
-        return filters.User(user_ids=users_store.get_approved_ids())
-
     # --- Handlers de admin (comandos dinámicos /aprobar_ID y /rechazar_ID) ---
     app.add_handler(MessageHandler(
         admin_filter & filters.Regex(re.compile(r"^/aprobar_\d+$")),

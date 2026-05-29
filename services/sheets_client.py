@@ -111,10 +111,10 @@ def get_resumen(tab_name: str) -> dict:
 
 
 def update_last_entry(tab_name: str, plato: str, calorias: int):
-    entry = get_last_entry(tab_name)
-    if not entry:
-        return
     sheet = _get_tab(tab_name)
-    row = entry["row_index"]
+    rows = sheet.get_all_values()
+    if len(rows) <= 1:
+        return
+    row = len(rows)
     sheet.update_cell(row, 3, plato)
     sheet.update_cell(row, 4, str(calorias))
