@@ -20,7 +20,7 @@ from telegram.ext import (
 )
 
 from handlers import log_food, onboarding, admin, commands
-from services import users_store, reminders
+from services import users_store, reminders, config
 
 TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
 ADMIN_USER_IDS = [int(x) for x in os.environ.get("ADMIN_USER_IDS", "").split(",") if x.strip()]
@@ -76,7 +76,10 @@ async def post_init(app):
 
 
 if __name__ == "__main__":
-    print("CalBot iniciando...")
+    config.setup_logging()
+    config.validate()
+    import logging
+    logging.getLogger(__name__).info("CalBot iniciando...")
     app = build_app()
     app.post_init = post_init
     app.run_polling()

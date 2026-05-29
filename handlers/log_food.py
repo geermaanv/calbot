@@ -1,7 +1,10 @@
+import logging
 from telegram import Update
 from telegram.ext import ContextTypes
 
 from services import ai_client, sheets_client, users_store
+
+logger = logging.getLogger(__name__)
 
 
 def _tab_name(update: Update) -> str:
@@ -14,7 +17,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     try:
         intent = ai_client.classify(text)
-    except Exception:
+    except Exception as e:
+        logger.error("Error clasificando mensaje de %s: %s", tab, e)
         await update.message.reply_text(
             "Hubo un error procesando tu mensaje. Intentá de nuevo."
         )
@@ -33,7 +37,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 async def _log_food(update: Update, text: str, tab: str):
     try:
         result = ai_client.estimate_calories(text)
-    except Exception:
+    except Exception as e:
+        logger.error("Error estimando calorías para %s: %s", tab, e)
         await update.message.reply_text(
             "No pude estimar las calorías. Intentá describir la comida con más detalle."
         )
@@ -42,11 +47,13 @@ async def _log_food(update: Update, text: str, tab: str):
     plato = result["plato"]
     calorias = result["calorias"]
     fecha = result.get("fecha")
+    logger.info("Registro: %s | %s | %s kcal | fecha: %s", tab, plato, calorias, fecha)
 
     try:
         sheets_client.append_entry(tab, text, plato, calorias, fecha)
         total = sheets_client.get_daily_total(tab, fecha)
-    except Exception:
+    except Exception as e:
+        logger.error("Error guardando registro de %s: %s", tab, e)
         await update.message.reply_text(
             "Estimé las calorías pero no pude guardar el registro. Intentá de nuevo."
         )

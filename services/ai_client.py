@@ -1,7 +1,10 @@
 import os
 import json
 import re
+import logging
 from openai import OpenAI
+
+logger = logging.getLogger(__name__)
 
 MODEL = "google/gemini-2.5-flash-lite"
 _client = None
@@ -50,6 +53,7 @@ def _parse_json(text: str) -> dict:
     match = re.search(r'\{[^{}]+\}', text)
     if match:
         return json.loads(match.group())
+    logger.warning("Respuesta inesperada del modelo: %s", text[:200])
     return json.loads(text)
 
 

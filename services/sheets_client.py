@@ -1,8 +1,11 @@
 import os
 import json
+import logging
 from datetime import datetime, timedelta
 import gspread
 from google.oauth2.service_account import Credentials
+
+logger = logging.getLogger(__name__)
 
 SCOPES = [
     "https://www.googleapis.com/auth/spreadsheets",
@@ -25,6 +28,7 @@ def _get_tab(tab_name: str):
     try:
         return spreadsheet.worksheet(tab_name)
     except gspread.WorksheetNotFound:
+        logger.info("Creando pestaña nueva para usuario: %s", tab_name)
         sheet = spreadsheet.add_worksheet(title=tab_name, rows=1000, cols=4)
         sheet.append_row(HEADERS)
         return sheet
