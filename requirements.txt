@@ -4,3 +4,4 @@ gspread
 python-dotenv
 openai
 apscheduler
+pytest

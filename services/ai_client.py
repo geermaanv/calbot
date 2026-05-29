@@ -3,12 +3,18 @@ import json
 import re
 from openai import OpenAI
 
-client = OpenAI(
-    api_key=os.environ["OPENROUTER_API_KEY"],
-    base_url="https://openrouter.ai/api/v1",
-)
-
 MODEL = "google/gemini-2.5-flash-lite"
+_client = None
+
+
+def _get_client() -> OpenAI:
+    global _client
+    if _client is None:
+        _client = OpenAI(
+            api_key=os.environ["OPENROUTER_API_KEY"],
+            base_url="https://openrouter.ai/api/v1",
+        )
+    return _client
 
 CLASSIFY_PROMPT = """Clasificá el siguiente mensaje en una de estas categorías:
 - "comida": el usuario describe algo que comió o va a comer
@@ -25,7 +31,7 @@ Estimá las calorías totales y respondé ÚNICAMENTE con este JSON, sin texto a
 
 
 def _chat(system: str, user: str, max_tokens: int) -> str:
-    response = client.chat.completions.create(
+    response = _get_client().chat.completions.create(
         model=MODEL,
         max_tokens=max_tokens,
         messages=[
