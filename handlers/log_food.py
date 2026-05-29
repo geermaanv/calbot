@@ -28,6 +28,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         await _log_food(update, text, tab)
     elif intent == "correccion":
         await _correct_entry(update, text, tab)
+    elif intent == "skip":
+        await update.message.reply_text("Ok, anotado. Si después comés algo, avisame.")
     else:
         await update.message.reply_text(
             "No entendí eso como una comida. Contame qué comiste y lo registro."

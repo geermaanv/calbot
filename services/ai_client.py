@@ -23,8 +23,9 @@ def _get_client() -> OpenAI:
 CLASSIFY_PROMPT = """Clasificá el siguiente mensaje en una de estas categorías:
 - "comida": el usuario describe algo que comió o va a comer
 - "correccion": el usuario quiere modificar su último registro (frases como "en realidad", "me equivoqué", "era", "fue", "corregí", "modificá")
+- "skip": el usuario indica que no comió nada o saltó esa comida (frases como "nada", "no comí", "no comí nada", "saltié", "no desayuné", "me lo salté", "nada por ahora", etc.)
 - "otro": cualquier otra cosa
-Respondé ÚNICAMENTE con una de estas tres palabras, sin texto adicional."""
+Respondé ÚNICAMENTE con una de estas cuatro palabras, sin texto adicional."""
 
 CALORIE_PROMPT = """Sos un nutricionista experto en cocina argentina y latinoamericana.
 El usuario describe lo que comió en español rioplatense.
